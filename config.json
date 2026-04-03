@@ -19,7 +19,7 @@
       "streamSettings": {
         "network": "ws",
         "wsSettings": {
-          "path": "/ss-path"
+          "path": "/gojo/curse-technique/combine"
         }
       },
       "sniffing": {

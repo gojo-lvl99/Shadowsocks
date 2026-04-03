@@ -1,36 +1,37 @@
 {
   "log": {
-    "level": "warn",
-    "timestamp": true
+    "loglevel": "warning"
   },
-
   "inbounds": [
     {
-      "type": "shadowsocks",
-      "tag": "ss-httpupgrade-tls",
-
+      "port": 8080,
       "listen": "0.0.0.0",
-      "listen_port": 8080,
-
-      "method": "2022-blake3-aes-256-gcm",
-      "password": "4gF0hjqrsnqcV6KL+x1t4lp4133g3DXE4YL764AZsjI=",
-
-      "transport": {
-        "type": "httpupgrade",
-        "path": "/hollow-purple"
+      "protocol": "shadowsocks",
+      "settings": {
+        "clients": [
+          {
+            "password": "4gF0hjqrsnqcV6KL+x1t4lp4133g3DXE4YL764AZsjI=",
+            "method": "chacha20-ietf-poly1305"
+          }
+        ],
+        "network": "tcp"
+      },
+      "streamSettings": {
+        "network": "ws",
+        "wsSettings": {
+          "path": "/ss-path"
+        }
+      },
+      "sniffing": {
+        "enabled": true,
+        "destOverride": ["http", "tls"]
       }
     }
   ],
-
   "outbounds": [
-    { "type": "direct", "tag": "direct" },
-    { "type": "block",  "tag": "block"  }
-  ],
-
-  "route": {
-    "rules": [
-      { "ip_is_private": true, "outbound": "block" }
-    ],
-    "final": "direct"
-  }
+    {
+      "protocol": "freedom",
+      "tag": "direct"
+    }
+  ]
 }

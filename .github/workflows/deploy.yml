@@ -1,0 +1,60 @@
+name: 🚀 Sing-box SS+HTTPUpgrade Builder
+
+on:
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: '🏷️ Docker Image Tag'
+        required: false
+        default: 'latest'
+
+jobs:
+  build-and-push:
+    name: 🐳 Build & Push to Docker Hub
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 🔧 Set Up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: 🔑 Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: 🔨 Build & Push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          platforms: linux/amd64
+          push: true
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/singbox-ss-httpupgrade:${{ inputs.image_tag }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/singbox-ss-httpupgrade:${{ github.run_number }}
+          cache-from: type=gha
+          cache-to:   type=gha,mode=max
+
+      - name: 📊 Summary
+        run: |
+          echo "## ✅ Build Complete" >> $GITHUB_STEP_SUMMARY
+          echo "| Field | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Image | \`${{ secrets.DOCKERHUB_USERNAME }}/singbox-ss-httpupgrade:${{ inputs.image_tag }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Protocol | Shadowsocks 2022-blake3-aes-256-gcm |" >> $GITHUB_STEP_SUMMARY
+          echo "| Transport | HTTPUpgrade |" >> $GITHUB_STEP_SUMMARY
+          echo "| Path | /hollow-purple |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🚀 Cloud Run Deploy" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
+          echo "gcloud run deploy singbox-ss-httpupgrade \\" >> $GITHUB_STEP_SUMMARY
+          echo "  --image ${{ secrets.DOCKERHUB_USERNAME }}/singbox-ss-httpupgrade:${{ inputs.image_tag }} \\" >> $GITHUB_STEP_SUMMARY
+          echo "  --port 8080 \\" >> $GITHUB_STEP_SUMMARY
+          echo "  --allow-unauthenticated \\" >> $GITHUB_STEP_SUMMARY
+          echo "  --region asia-southeast1 \\" >> $GITHUB_STEP_SUMMARY
+          echo "  --memory 256Mi \\" >> $GITHUB_STEP_SUMMARY
+          echo "  --cpu 1" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
